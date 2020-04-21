@@ -1,34 +1,12 @@
 # tictactoe
 
-## Project setup
-```
-npm install
-```
+Play Tic Tac Toe online.
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+## Technical Items
 
-### Compiles and minifies for production
-```
-npm run build
-```
+This project is created using Vue CLI. The following are references:
 
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+- Compile and hot-reloads for development: `npm run serve`
+- Compile and minify for production: `npm run build`
+- Unit test: `npm run test:unit`
+- End to End test: `npm run test:e2e`
