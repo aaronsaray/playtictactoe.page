@@ -1,5 +1,11 @@
 <template>
   <div>
+    <div v-if="winner" class="results">
+      <section>
+        <h3>{{ winner.toUpperCase() }} Wins!</h3>
+        <a href="#" @click.prevent="playAgain()">Play Again?</a>
+      </section>
+    </div>
     <header class="participants">
       <div :class="{ active: xActive, x: xActive }">
         <h2>X's Turn</h2>
@@ -110,6 +116,7 @@ export default {
     playAgain() {
       this.initializeBoard();
       this.tie = false;
+      this.winner = false;
       this.xActive = true;
     }
   }
@@ -122,6 +129,26 @@ export default {
 }
 .o {
   color: $o;
+}
+
+.results {
+  z-index: 2;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
+  text-align: center;
+  a {
+    display: inline-block;
+    color: $success;
+    margin-bottom: 30vh;
+  }
 }
 
 .participants {
