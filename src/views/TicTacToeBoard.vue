@@ -111,6 +111,8 @@ export default {
 </script>
 
 <style lang="scss">
+$x: #00bc8c;
+
 .participants {
   display: flex;
   justify-content: space-around;
@@ -119,9 +121,10 @@ export default {
     margin-top: 0;
     font-size: 1.5rem;
     font-weight: 300;
+    color: #444;
   }
   .active h2 {
-    font-weight: 600;
+    color: $x;
   }
 }
 
@@ -141,6 +144,7 @@ export default {
 #board {
   width: 80vw;
   height: 80vw;
+  max-height: 80%;
   margin: auto;
   display: grid;
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
@@ -190,7 +194,7 @@ export default {
     }
 
     .x {
-      color: #00bc8c;
+      color: $x;
     }
     .o {
       color: #3498db;
