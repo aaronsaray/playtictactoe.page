@@ -23,7 +23,21 @@
 
 <script>
 export default {
-  props: ["hasMark", "mark", "enabled"],
+  props: {
+    hasMark: {
+      required: true
+    },
+
+    mark: {
+      required: true,
+      type: String
+    },
+
+    enabled: {
+      required: true,
+      type: Boolean
+    }
+  },
 
   data: function() {
     return {
