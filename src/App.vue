@@ -7,6 +7,7 @@
         href="https://morebetterfaster.io"
         target="_blank"
         title="For Programming With Best Practices and Bullet-proof Processes"
+        @click="trackMBF()"
       >
         More Better Faster
       </a>
@@ -20,6 +21,16 @@ import TicTacToeBoard from "@/views/TicTacToeBoard";
 export default {
   components: {
     "tic-tac-toe-board": TicTacToeBoard
+  },
+
+  methods: {
+    trackMBF() {
+      this.$gtag.event("outbound", {
+        event_category: "click",
+        event_label: "url",
+        value: "https://morebetterfaster.io"
+      });
+    }
   }
 };
 </script>

@@ -90,11 +90,18 @@ export default {
         if (items.every(item => item === "x")) {
           this.winningSet = check;
           this.winner = "x";
-          return true;
-        }
-        if (items.every(item => item === "o")) {
+        } else if (items.every(item => item === "o")) {
           this.winningSet = check;
           this.winner = "o";
+        }
+
+        if (this.winner) {
+          this.$gtag.event("win", {
+            event_category: "game",
+            event_label: "winner",
+            value: this.winner
+          });
+
           return true;
         }
 
@@ -105,6 +112,9 @@ export default {
     checkTie() {
       if (this.board.every(item => item)) {
         this.tie = true;
+        this.$gtag.event("tie", {
+          event_category: "game"
+        });
         return true;
       }
     },
@@ -114,6 +124,10 @@ export default {
     },
 
     playAgain() {
+      this.$gtag.event("reset", {
+        event_category: "game"
+      });
+
       this.initializeBoard();
       this.tie = false;
       this.winner = false;
