@@ -1,6 +1,5 @@
 import { shallowMount } from "@vue/test-utils";
 import AMark from "@/components/AMark.vue";
-import { directive } from "@babel/types";
 
 describe("AMark.vue", () => {
   it("renders no marks when nothing is indicated", () => {
