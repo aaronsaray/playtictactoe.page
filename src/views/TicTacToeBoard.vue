@@ -1,8 +1,9 @@
 <template>
   <div>
-    <div v-if="winner" class="results">
+    <div v-if="winner || tie" class="results">
       <section>
-        <h3>{{ winner.toUpperCase() }} Wins!</h3>
+        <h3 v-if="winner">{{ winner.toUpperCase() }} Wins!</h3>
+        <h3 v-if="tie">It's a Tie.</h3>
         <a href="#" @click.prevent="playAgain()">Play Again?</a>
       </section>
     </div>
@@ -188,14 +189,25 @@ export default {
 
 #board {
   width: 80vw;
+  max-width: 80vh;
+  @media (min-width: 1000px) {
+    max-width: 800px;
+  }
   height: 80vw;
-  max-height: 80%;
+  max-height: 80vh;
+  @media (min-width: 1000px) {
+    max-height: 800px;
+  }
   margin: auto;
   display: grid;
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 
   .a-mark-container {
-    border: 1vh solid $primary;
+    border: 1vw solid $primary;
+    @media (min-width: 1000px) {
+      border-width: 10px;
+    }
+
     &:nth-child(1) {
       border-top-color: transparent;
       border-left-color: transparent;
@@ -226,6 +238,9 @@ export default {
     }
 
     font-size: 20vw;
+    @media (min-width: 1000px) {
+      font-size: 200px;
+    }
     text-align: center;
     line-height: 1;
     cursor: pointer;
