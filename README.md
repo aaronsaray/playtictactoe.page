@@ -1,6 +1,10 @@
-# tictactoe
+# Play Tic Tac Toe
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/a082d2e5-b2d4-4c68-ac0e-5519ff942319/deploy-status)](https://app.netlify.com/sites/playtictactoe-page/deploys)
 
 [Play Tic Tac Toe](https://playtictactoe.page) online.
+
+---
 
 ## Technical Items
 
