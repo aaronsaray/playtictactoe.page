@@ -28,3 +28,6 @@ jobs:
 
       - name: Execute Unit Tests, logs coverage
         run: npm run test:unit-coverage
+
+      - name: Trigger Netlify Build
+        run: curl -X POST -d {} "${{ secrets.NETLIFY_BUILD_HOOK }}"
