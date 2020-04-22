@@ -1,6 +1,6 @@
 # tictactoe
 
-Play Tic Tac Toe online.
+[Play Tic Tac Toe](https://playtictactoe.page) online.
 
 ## Technical Items
 
