@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <tic-tac-toe-board></tic-tac-toe-board>
+    <main>
+      <tic-tac-toe-board></tic-tac-toe-board>
+    </main>
     <footer>
       &copy; {{ new Date().getFullYear() }}
       <a
@@ -39,11 +41,15 @@ export default {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+main {
+  padding-bottom: 4rem;
+}
 footer {
-  position: absolute;
+  position: fixed;
   bottom: 0;
   right: 0;
   left: 0;
+  height: 3rem;
   background: #191919;
   color: #cccccc;
   padding: 1rem;
