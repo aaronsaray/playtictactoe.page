@@ -203,6 +203,7 @@ export default {
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
 
   .a-mark-container {
+    overflow: hidden;
     border: 1vw solid $primary;
     @media (min-width: 1000px) {
       border-width: 10px;
