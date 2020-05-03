@@ -6,4 +6,4 @@
 [[redirects]]
   from = "https://playtictactoe-page.netlify.app/*"
   to = "https://playtictactoe.page/:splat"
-  status = 301
+  status = "301!"
