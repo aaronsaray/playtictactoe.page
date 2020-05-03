@@ -2,3 +2,8 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "https://playtictactoe-page.netlify.app/*"
+  to = "https://playtictactoe.page/:splat"
+  status = 301
