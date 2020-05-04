@@ -58,6 +58,7 @@ export default {
 
   methods: {
     initializeBoard() {
+      this.nerdStat("Initialize Board");
       this.board = Array(9).fill(null);
     },
 
