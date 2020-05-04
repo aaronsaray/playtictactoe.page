@@ -24,11 +24,7 @@
           More Better Faster
         </a>
       </section>
-      <section id="nerd-stats">
-        <p v-for="(stat, index) in nerdStats" :key="`nerd-stat-${index}`">
-          {{ stat }}
-        </p>
-      </section>
+      <section id="nerd-stats" ref="nerd-stats"></section>
     </footer>
   </div>
 </template>
@@ -43,15 +39,28 @@ export default {
   },
 
   created() {
+    /**
+     * Writing to the dom without using vue's reactivity because nerd stats can get pretty memory intensive,
+     * and it's not something I really need to save or interact with again.  Also, next tick is used so that this
+     * can write out to the DOM after created/mounted - otherwise sometimes the elements aren't available.  This also
+     * allows the rendering to continue without being slowed down by logging silly stats
+     */
     EventBus.$on("nerd-stat", stat => {
-      this.nerdStats.push(stat);
+      this.$nextTick(() => {
+        const p = document.createElement("p");
+        const text = document.createTextNode(stat);
+        p.appendChild(text);
+        const nerdStats = this.$refs["nerd-stats"];
+        nerdStats &&
+          nerdStats.appendChild(p) &&
+          (nerdStats.scrollTop = nerdStats.scrollHeight);
+      });
     });
   },
 
   data: function() {
     return {
-      showNerdStats: false,
-      nerdStats: []
+      showNerdStats: false
     };
   },
 

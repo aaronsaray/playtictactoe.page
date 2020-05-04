@@ -64,7 +64,11 @@ export default {
 
     iChoseThis(index) {
       if (!this.board[index]) {
-        this.board[index] = this.xActive ? "x" : "o";
+        const mark = this.xActive ? "x" : "o";
+
+        this.nerdStat("Choosing spot " + index + " with " + mark);
+
+        this.board[index] = mark;
 
         this.checkWinner() || this.checkTie() || this.activateOtherPlayer();
       }
@@ -82,7 +86,7 @@ export default {
         [2, 4, 6]
       ];
 
-      return winning.some(check => {
+      let result = winning.some(check => {
         let items = [
           this.board[check[0]],
           this.board[check[1]],
@@ -109,15 +113,29 @@ export default {
 
         return false;
       });
+
+      if (result) {
+        this.nerdStat(`Winner ${this.winner}`);
+      } else {
+        this.nerdStat("No winner found");
+      }
+
+      return result;
     },
 
     checkTie() {
-      if (this.board.every(item => item)) {
+      let isTie = this.board.every(item => item);
+
+      if (isTie) {
         this.tie = true;
         this.$gtag.event("tie", {
           event_category: "game"
         });
+        this.nerdStat("Was a tie");
         return true;
+      } else {
+        this.nerdStat("No tie found");
+        return false;
       }
     },
 
@@ -149,7 +167,7 @@ export default {
 
 .results {
   z-index: 2;
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
