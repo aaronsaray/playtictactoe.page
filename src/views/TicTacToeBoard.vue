@@ -8,11 +8,24 @@
       </section>
     </div>
     <header class="participants">
-      <div :class="{ active: xActive, x: xActive }">
-        <h2>X's Turn</h2>
+      <div>
+        <h2 :class="{ x: xActive }">&times;</h2>
+        <div>
+          <strong>Player</strong>
+          <br />0 / 0 / 0
+        </div>
       </div>
-      <div :class="{ active: !xActive, o: !xActive }">
-        <h2>O's Turn</h2>
+      <div class="turn" :class="{ x: xActive, o: !xActive }">
+        <span v-if="xActive">⬅</span>
+        Turn
+        <span v-if="!xActive">⮕</span>
+      </div>
+      <div>
+        <h2 :class="{ o: !xActive }">o</h2>
+        <div>
+          <strong>Player</strong>
+          <br />0 / 0 / 0
+        </div>
       </div>
     </header>
     <section id="board">
@@ -188,12 +201,21 @@ export default {
 .participants {
   display: flex;
   justify-content: space-around;
-  color: #444;
+  align-items: center;
+  color: #666;
+  margin-bottom: 1rem;
+
+  .turn {
+    font-size: 2rem;
+  }
 
   h2 {
-    margin-top: 0;
-    font-size: 1.5rem;
-    font-weight: 300;
+    margin: 0 1rem 0 0;
+    display: inline-block;
+    font-size: 4rem;
+  }
+  h2 + div {
+    display: inline-block;
   }
 }
 
