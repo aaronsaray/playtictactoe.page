@@ -12,7 +12,7 @@
         <h2 :class="{ x: xActive }">&times;</h2>
         <div>
           <strong>Player</strong>
-          <br />0 / 0 / 0
+          <br />{{ scores.wins.x }} / {{ scores.losses.x }} / {{ scores.ties }}
         </div>
       </div>
       <div class="turn" :class="{ x: xActive, o: !xActive }">
@@ -24,7 +24,7 @@
         <h2 :class="{ o: !xActive }">o</h2>
         <div>
           <strong>Player</strong>
-          <br />0 / 0 / 0
+          <br />{{ scores.wins.o }} / {{ scores.losses.o }} / {{ scores.ties }}
         </div>
       </div>
     </header>
@@ -61,7 +61,18 @@ export default {
       tie: false,
       winner: false,
       winningSet: [],
-      board: null
+      board: null,
+      scores: {
+        wins: {
+          x: 0,
+          o: 0
+        },
+        losses: {
+          x: 0,
+          o: 0
+        },
+        ties: 0
+      }
     };
   },
 
@@ -115,6 +126,10 @@ export default {
         }
 
         if (this.winner) {
+          this.nerdStat("Winning set: " + JSON.stringify(this.winningSet));
+          this.scores.wins[this.winner]++;
+          this.scores.losses[this.winner !== "x" ? "x" : "o"]++;
+
           this.$gtag.event("win", {
             event_category: "game",
             event_label: "winner",
@@ -141,9 +156,12 @@ export default {
 
       if (isTie) {
         this.tie = true;
+        this.scores.ties++;
+
         this.$gtag.event("tie", {
           event_category: "game"
         });
+
         this.nerdStat("Was a tie");
         return true;
       } else {
