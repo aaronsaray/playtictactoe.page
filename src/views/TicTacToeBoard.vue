@@ -2,7 +2,15 @@
   <div>
     <div v-if="winner || tie" class="results">
       <section>
-        <h3 v-if="winner">{{ winner.toUpperCase() }} Wins!</h3>
+        <h3 v-if="winner">
+          <span v-if="isDefaultPlayerName(winner)">
+            {{ winner.toUpperCase() }}
+          </span>
+          <span v-else>
+            {{ player[winner] }}
+          </span>
+          Wins!
+        </h3>
         <h3 v-if="tie">It's a Tie.</h3>
         <a href="#" @click.prevent="playAgain()">Play Again?</a>
       </section>
@@ -88,6 +96,8 @@
 <script>
 import AMark from "@/components/AMark";
 
+const DEFAULT_PLAYER_NAME = "Player";
+
 export default {
   components: {
     "a-mark": AMark
@@ -119,8 +129,8 @@ export default {
         o: false
       },
       player: {
-        x: "Player",
-        o: "Player"
+        x: DEFAULT_PLAYER_NAME,
+        o: DEFAULT_PLAYER_NAME
       }
     };
   },
@@ -248,13 +258,17 @@ export default {
       if (this.changingPlayerName[which]) {
         if (!this.player[which]) {
           this.nerdStat(`Player name ${which} was blank, resetting.`);
-          this.player[which] = "Player";
+          this.player[which] = DEFAULT_PLAYER_NAME;
         }
         this.nerdStat(
           `Finish changing player name ${which} to ${this.player[which]}`
         );
         this.changingPlayerName[which] = false;
       }
+    },
+
+    isDefaultPlayerName(which) {
+      return this.player[which] === DEFAULT_PLAYER_NAME;
     }
   }
 };
