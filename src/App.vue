@@ -77,14 +77,9 @@ export default {
 </script>
 <style lang="scss">
 * {
-  scrollbar-width: thin;
   scrollbar-color: #333333 #202020;
 }
 
-/* Works on Chrome/Edge/Safari */
-*::-webkit-scrollbar {
-  width: 12px;
-}
 *::-webkit-scrollbar-track {
   background: #202020;
 }

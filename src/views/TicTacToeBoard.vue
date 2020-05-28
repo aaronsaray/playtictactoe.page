@@ -9,10 +9,30 @@
     </div>
     <header class="participants">
       <div>
-        <h2 :class="{ x: xActive }">&times;</h2>
-        <div>
-          <strong>Player</strong>
-          <br />{{ scores.wins.x }} / {{ scores.losses.x }} / {{ scores.ties }}
+        <div class="player">
+          <h2 :class="{ x: xActive }">&times;</h2>
+          <span
+            @click="!changingPlayerName.x && changePlayerName('x')"
+            class="player-name"
+            :class="{ changing: changingPlayerName.x }"
+          >
+            <strong>{{ player.x }}</strong>
+          </span>
+          <form
+            v-if="changingPlayerName.x"
+            @submit.prevent="finishChangingPlayerName('x')"
+          >
+            <input
+              type="text"
+              maxlength="10"
+              ref="player-name-input-x"
+              v-model="player.x"
+              @blur="finishChangingPlayerName('x')"
+            />
+          </form>
+        </div>
+        <div class="scores">
+          {{ scores.wins.x }} / {{ scores.losses.x }} / {{ scores.ties }}
         </div>
       </div>
       <div class="turn" :class="{ x: xActive, o: !xActive }">
@@ -21,10 +41,30 @@
         <span v-if="!xActive">⮕</span>
       </div>
       <div>
-        <h2 :class="{ o: !xActive }">o</h2>
-        <div>
-          <strong>Player</strong>
-          <br />{{ scores.wins.o }} / {{ scores.losses.o }} / {{ scores.ties }}
+        <div class="player">
+          <h2 :class="{ o: !xActive }">o</h2>
+          <span
+            @click="!changingPlayerName.o && changePlayerName('o')"
+            class="player-name"
+            :class="{ changing: changingPlayerName.o }"
+          >
+            <strong>{{ player.o }}</strong>
+          </span>
+          <form
+            v-if="changingPlayerName.o"
+            @submit.prevent="finishChangingPlayerName('o')"
+          >
+            <input
+              type="text"
+              maxlength="10"
+              ref="player-name-input-o"
+              v-model="player.o"
+              @blur="finishChangingPlayerName('o')"
+            />
+          </form>
+        </div>
+        <div class="scores">
+          {{ scores.wins.o }} / {{ scores.losses.o }} / {{ scores.ties }}
         </div>
       </div>
     </header>
@@ -72,6 +112,15 @@ export default {
           o: 0
         },
         ties: 0
+      },
+
+      changingPlayerName: {
+        x: false,
+        o: false
+      },
+      player: {
+        x: "Player",
+        o: "Player"
       }
     };
   },
@@ -183,6 +232,29 @@ export default {
       this.tie = false;
       this.winner = false;
       this.xActive = true;
+    },
+
+    changePlayerName(which) {
+      this.nerdStat(`Start changing player name ${which}`);
+      this.changingPlayerName[which] = true;
+
+      this.$nextTick(() => {
+        this.$refs[`player-name-input-${which}`].focus();
+      });
+    },
+
+    finishChangingPlayerName(which) {
+      // this makes sure blur and submit don't both fire
+      if (this.changingPlayerName[which]) {
+        if (!this.player[which]) {
+          this.nerdStat(`Player name ${which} was blank, resetting.`);
+          this.player[which] = "Player";
+        }
+        this.nerdStat(
+          `Finish changing player name ${which} to ${this.player[which]}`
+        );
+        this.changingPlayerName[which] = false;
+      }
     }
   }
 };
@@ -218,23 +290,49 @@ export default {
 
 .participants {
   display: flex;
-  justify-content: space-around;
   align-items: center;
   color: #666;
   margin-bottom: 1rem;
 
+  & > div {
+    flex: 1;
+    text-align: center;
+  }
+
   .turn {
     font-size: 2rem;
   }
-
+}
+.player {
+  position: relative;
   h2 {
     margin: 0 1rem 0 0;
     display: inline-block;
     font-size: 4rem;
+    vertical-align: sub;
   }
-  h2 + div {
-    display: inline-block;
+  strong {
+    font-size: 2.8rem;
   }
+  .player-name {
+    cursor: pointer;
+    &.changing {
+      visibility: hidden;
+      cursor: default;
+    }
+  }
+
+  input {
+    width: 100%;
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    font-weight: bold;
+    text-align: center;
+  }
+}
+.scores {
+  text-align: center;
 }
 
 .results-banner {
@@ -313,6 +411,19 @@ export default {
       text-shadow: 0px 6px 9px #000000;
       opacity: 0.8;
     }
+  }
+}
+
+input {
+  background: #121212;
+  color: #ffffff;
+  border: none;
+  border-bottom: 1px solid #444444;
+  padding: 0.2rem 0.5rem;
+  font-size: 2.6rem;
+  &:focus {
+    outline: none;
+    background: #000000;
   }
 }
 </style>
