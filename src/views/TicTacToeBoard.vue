@@ -15,67 +15,80 @@
         <a href="#" @click.prevent="playAgain()">Play Again?</a>
       </section>
     </div>
-    <header class="participants">
-      <div>
-        <div class="player">
-          <h2 :class="{ x: xActive }">&times;</h2>
-          <span
-            @click="!changingPlayerName.x && changePlayerName('x')"
-            class="player-name"
-            :class="{ changing: changingPlayerName.x }"
-          >
-            <strong>{{ player.x }}</strong>
-          </span>
-          <form
-            v-if="changingPlayerName.x"
-            @submit.prevent="finishChangingPlayerName('x')"
-          >
-            <input
-              type="text"
-              maxlength="10"
-              ref="player-name-input-x"
-              v-model="player.x"
-              @blur="finishChangingPlayerName('x')"
-            />
-          </form>
+    <div>
+      <div class="game-type">
+        Game type:
+        <select
+          :disabled="gameTypeLocked"
+          v-model="gameType"
+          @change="toggleGameType()"
+        >
+          <option :value="GAME_TYPE_2_PLAYER">2 Player</option>
+          <option :value="GAME_TYPE_1_PLAYER_EASY">1 Player (Easy)</option>
+        </select>
+      </div>
+      <div class="participants">
+        <div>
+          <div class="player">
+            <h2 :class="{ x: xActive }">&times;</h2>
+            <span
+              @click="!changingPlayerName.x && changePlayerName('x')"
+              class="player-name"
+              :class="{ changing: changingPlayerName.x }"
+            >
+              <strong>{{ player.x }}</strong>
+            </span>
+            <form
+              v-if="changingPlayerName.x"
+              @submit.prevent="finishChangingPlayerName('x')"
+            >
+              <input
+                type="text"
+                maxlength="10"
+                ref="player-name-input-x"
+                v-model="player.x"
+                @blur="finishChangingPlayerName('x')"
+              />
+            </form>
+          </div>
+          <div class="scores">
+            {{ scores.wins.x }} / {{ scores.losses.x }} / {{ scores.ties }}
+          </div>
         </div>
-        <div class="scores">
-          {{ scores.wins.x }} / {{ scores.losses.x }} / {{ scores.ties }}
+        <div class="turn" :class="{ x: xActive, o: !xActive }">
+          <span v-if="xActive">⬅</span>
+          Turn
+          <span v-if="!xActive">⮕</span>
+        </div>
+        <div>
+          <div class="player">
+            <h2 :class="{ o: !xActive }">o</h2>
+            <span
+              @click="!changingPlayerName.o && changePlayerName('o')"
+              class="player-name"
+              :class="{ changing: changingPlayerName.o }"
+            >
+              <strong>{{ player.o }}</strong>
+            </span>
+            <form
+              v-if="changingPlayerName.o"
+              @submit.prevent="finishChangingPlayerName('o')"
+            >
+              <input
+                type="text"
+                maxlength="10"
+                ref="player-name-input-o"
+                v-model="player.o"
+                @blur="finishChangingPlayerName('o')"
+              />
+            </form>
+          </div>
+          <div class="scores">
+            {{ scores.wins.o }} / {{ scores.losses.o }} / {{ scores.ties }}
+          </div>
         </div>
       </div>
-      <div class="turn" :class="{ x: xActive, o: !xActive }">
-        <span v-if="xActive">⬅</span>
-        Turn
-        <span v-if="!xActive">⮕</span>
-      </div>
-      <div>
-        <div class="player">
-          <h2 :class="{ o: !xActive }">o</h2>
-          <span
-            @click="!changingPlayerName.o && changePlayerName('o')"
-            class="player-name"
-            :class="{ changing: changingPlayerName.o }"
-          >
-            <strong>{{ player.o }}</strong>
-          </span>
-          <form
-            v-if="changingPlayerName.o"
-            @submit.prevent="finishChangingPlayerName('o')"
-          >
-            <input
-              type="text"
-              maxlength="10"
-              ref="player-name-input-o"
-              v-model="player.o"
-              @blur="finishChangingPlayerName('o')"
-            />
-          </form>
-        </div>
-        <div class="scores">
-          {{ scores.wins.o }} / {{ scores.losses.o }} / {{ scores.ties }}
-        </div>
-      </div>
-    </header>
+    </div>
     <section id="board">
       <a-mark
         v-for="(mark, index) in board"
@@ -84,9 +97,10 @@
         :has-mark="mark"
         v-on:chose="iChoseThis(index)"
         class="a-mark-container"
-        :enabled="!winner && !tie"
+        :enabled="isMarkEnabledForPlayerChoice"
         :class="{
-          winner: winner && winner == mark && winningSet.includes(index)
+          winner: winner && winner == mark && winningSet.includes(index),
+          available: isMarkEnabledForPlayerChoice
         }"
       ></a-mark>
     </section>
@@ -97,6 +111,11 @@
 import AMark from "@/components/AMark";
 
 const DEFAULT_PLAYER_NAME = "Player";
+const COMPUTER_PLAYER_NAME = "Computer";
+const GAME_TYPE_2_PLAYER = "2";
+const GAME_TYPE_1_PLAYER_EASY = "1E";
+const GAME_TYPE_1_PLAYER_HARD = "1H";
+const DEFAULT_GAME_TYPE = GAME_TYPE_2_PLAYER;
 
 export default {
   components: {
@@ -105,6 +124,12 @@ export default {
 
   data: function() {
     return {
+      GAME_TYPE_2_PLAYER,
+      GAME_TYPE_1_PLAYER_EASY,
+      GAME_TYPE_1_PLAYER_HARD,
+
+      gameType: DEFAULT_GAME_TYPE,
+      gameTypeLocked: false,
       consideringX: null,
       consideringY: null,
       xActive: true,
@@ -131,7 +156,8 @@ export default {
       player: {
         x: DEFAULT_PLAYER_NAME,
         o: DEFAULT_PLAYER_NAME
-      }
+      },
+      oPlayerOldName: ""
     };
   },
 
@@ -147,6 +173,8 @@ export default {
 
     iChoseThis(index) {
       if (!this.board[index]) {
+        if (!this.gameTypeLocked) this.gameTypeLocked = true;
+
         const mark = this.xActive ? "x" : "o";
 
         this.nerdStat("Choosing spot " + index + " with " + mark);
@@ -231,6 +259,9 @@ export default {
 
     activateOtherPlayer() {
       this.xActive = !this.xActive;
+      if (!this.xActive && this.gameType === GAME_TYPE_1_PLAYER_EASY) {
+        this.computerMoveEasy();
+      }
     },
 
     playAgain() {
@@ -269,6 +300,41 @@ export default {
 
     isDefaultPlayerName(which) {
       return this.player[which] === DEFAULT_PLAYER_NAME;
+    },
+
+    toggleGameType() {
+      if (this.gameType === GAME_TYPE_2_PLAYER) {
+        this.player.o = this.oPlayerOldName;
+        this.oPlayerOldName = "";
+      } else {
+        this.oPlayerOldName = this.player.o;
+        this.player.o = COMPUTER_PLAYER_NAME;
+      }
+    },
+
+    computerMoveEasy() {
+      this.nerdStat("Computer move turn.");
+
+      setTimeout(() => {
+        this.nerdStat("Thinking done.");
+
+        let o;
+        do {
+          o = Math.floor(Math.random() * 9);
+          this.nerdStat(`Computer attempting to pick: ${o}`);
+        } while (this.board[o]);
+        this.iChoseThis(o);
+      }, 1000);
+    }
+  },
+
+  computed: {
+    isMarkEnabledForPlayerChoice() {
+      return (
+        !this.winner &&
+        !this.tie &&
+        (this.gameType === GAME_TYPE_2_PLAYER || this.xActive)
+      );
     }
   }
 };
@@ -302,6 +368,25 @@ export default {
   }
 }
 
+.game-type {
+  color: #aaaaaa;
+  text-align: center;
+  select {
+    width: 8rem;
+    margin-left: 0.4rem;
+    background: #191919;
+    color: #cccccc;
+    border: 1px solid #333333;
+    padding: 0.2rem;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    background: transparent
+      url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAICAAAAADlkTFqAAAANklEQVR4AQXBQQHAQAgDsNrIvwp3rsAKopYEgHiFfvJuSudeujft3Da6N3NboXu3JehuEWjhBwUzF3Yyug3mAAAAAElFTkSuQmCC")
+      right center no-repeat !important;
+    background-position: calc(100% - 5px) center !important;
+    padding-right: 16px;
+  }
+}
 .participants {
   display: flex;
   align-items: center;
@@ -362,12 +447,12 @@ export default {
   width: 80vw;
   max-width: 80vh;
   @media (min-width: 1000px) {
-    max-width: 800px;
+    max-width: 750px;
   }
   height: 80vw;
   max-height: 80vh;
   @media (min-width: 1000px) {
-    max-height: 800px;
+    max-height: 750px;
   }
   margin: auto;
   display: grid;
@@ -415,10 +500,14 @@ export default {
     }
     text-align: center;
     line-height: 1;
-    cursor: pointer;
+    cursor: not-allowed;
 
     &.winner * {
       color: #ffffff;
+    }
+
+    &.available {
+      cursor: pointer;
     }
 
     .considering {
