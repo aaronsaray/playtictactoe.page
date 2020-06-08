@@ -388,6 +388,7 @@ export default {
   }
 }
 .participants {
+  padding: 0.1rem;
   display: flex;
   align-items: center;
   color: #666;
@@ -399,7 +400,7 @@ export default {
   }
 
   .turn {
-    font-size: 2rem;
+    font-size: min(5vw, 2rem);
   }
 }
 .player {
@@ -407,11 +408,11 @@ export default {
   h2 {
     margin: 0 1rem 0 0;
     display: inline-block;
-    font-size: 4rem;
+    font-size: min(10vw, 4rem);
     vertical-align: sub;
   }
   strong {
-    font-size: 2.8rem;
+    font-size: min(5vw, 2.8rem);
   }
   .player-name {
     cursor: pointer;
@@ -428,6 +429,7 @@ export default {
     left: 0;
     font-weight: bold;
     text-align: center;
+    font-size: min(5vw, 2.8rem);
   }
 }
 .scores {
