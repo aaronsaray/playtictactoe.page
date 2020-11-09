@@ -1,9 +1,17 @@
-# t
+# Play Tic Tac Toe
+
+[https://playtictactoe.page](https://playtictactoe.page) source code.
 
 ## Project setup
 ```
 npm install
 ```
+
+* Create a Firebase project named after the environment
+* Create a web project named after the project
+* Copy `.env.example` to `.env.local` and fill in values
+* Create a cloud firestore database
+
 
 ### Compiles and hot-reloads for development
 ```

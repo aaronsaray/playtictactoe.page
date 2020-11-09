@@ -1,6 +1,9 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
+    <ul>
+      <li v-for="(word, index) in words" :key="index">{{ word.word }}</li>
+    </ul>
     <p>
       For a guide and recipes on how to configure / customize this project,<br />
       check out the
@@ -69,10 +72,21 @@
 </template>
 
 <script>
+import { db } from "../db";
+
 export default {
   name: "HelloWorld",
   props: {
     msg: String,
+  },
+  data() {
+    return {
+      words: [],
+    };
+  },
+
+  firestore: {
+    words: db.collection("words"),
   },
 };
 </script>
