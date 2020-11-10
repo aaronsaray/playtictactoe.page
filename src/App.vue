@@ -7,19 +7,6 @@
 </template>
 
 <style lang="scss">
-$primary: #375a7f;
-$x: #bb86fc;
-$o: #3498db;
-$success: #00bc8c;
-
-@function set-button-text-color($color) {
-  @if (lightness($color) > 40) {
-    @return black;
-  } @else {
-    @return white;
-  }
-}
-
 * {
   scrollbar-color: #333333 #202020;
 }
@@ -54,5 +41,11 @@ input {
   border: none;
   border-bottom: 1px solid #444;
   padding: 0.2rem 0.5rem;
+}
+.x {
+  color: $x;
+}
+.o {
+  color: $o;
 }
 </style>

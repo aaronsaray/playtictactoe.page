@@ -1,14 +1,14 @@
 import Vue from "vue";
 import VueRouter from "vue-router";
-import StartOrJoin from "@/components/StartOrJoin.vue";
+import GameBoard from "@/components/GameBoard.vue";
 
 Vue.use(VueRouter);
 
 const routes = [
   {
     path: "/",
-    name: "StartOrJoin",
-    component: StartOrJoin,
+    name: "GameBoard",
+    component: GameBoard,
     // },
     // {
     //   path: "/about",
