@@ -2,20 +2,89 @@
 <html lang="en">
 
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0">
-  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-  <title><%= htmlWebpackPlugin.options.title %></title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no" />
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico" />
+  <link rel="apple-touch-icon" href="<%= BASE_URL %>tictactoe.png" />
+  <title>Play Tic Tac Toe</title>
+  <meta name="description" content="Play tic-tac-toe online for free!" />
+  <meta property="og:title" content="Play Tic Tac Toe" />
+  <meta property="og:description" content="Play tic-tac-toe online for free!" />
+  <meta property="og:url" content="https://playtictactoe.page" />
+  <meta property="og:site_name" content="Play Tic Tac Toe" />
+  <meta property="og:image" content="https://playtictactoe.page/tictactoe.png" />
+  <meta property="og:type" content="website" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      background: #222222;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+    }
+
+    h1 {
+      padding: 1rem;
+      margin: 0;
+      text-align: center;
+      font-size: 2.5rem;
+      font-weight: 300;
+    }
+
+    #loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #loading svg {
+      width: 10vw;
+      animation: loadingAnimation 1s infinite;
+    }
+
+    @keyframes loadingAnimation {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.2;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
 </head>
 
 <body>
+  <h1>Play Tic Tac Toe</h1>
+  <div id="app">
+    <div id="loading">
+      <svg enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512"
+        xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="m421 189.088c0 15.84-12.33 28.94-28.13 29.89h-41.04l-.01 72.08 37.42.01c.62-.039 1.229-.061 1.84-.061 16.4 0 29.92 13.32 29.92 29.951 0 15.84-12.33 28.93-28.13 29.889l-41.07-.01v37.4c.04.621.061 1.23.061 1.84 0 16.4-13.32 29.92-29.95 29.92-15.84 0-28.94-12.33-29.891-28.129v-41.041l-72.08-.01-.01 37.42c.04.621.06 1.23.06 1.84 0 16.4-13.32 29.92-29.95 29.92-15.84 0-28.93-12.33-29.89-28.129l.01-41.07h-37.4c-.62.039-1.23.061-1.84.061-16.4 0-29.92-13.32-29.92-29.951 0-15.84 12.33-28.939 28.13-29.891h41.04l.01-72.079-37.42-.01c-.62.04-1.23.06-1.84.06-16.4 0-29.92-13.32-29.92-29.95 0-15.84 12.33-28.93 28.13-29.89l41.07.01v-37.4c-.04-.62-.06-1.23-.06-1.84 0-16.4 13.32-29.92 29.95-29.92 15.84 0 28.94 12.33 29.89 28.13v41.04l72.08.01.011-37.42c-.04-.62-.061-1.23-.061-1.84 0-16.4 13.32-29.92 29.95-29.92 15.84 0 28.93 12.33 29.89 28.13l-.01 41.07h37.4c.62-.04 1.229-.06 1.84-.06 16.4.001 29.92 13.32 29.92 29.95zm-128.96 101.961.01-72.09-72.09-.01-.01 72.09z"
+          fill="#cbd2d9" />
+      </svg>
+    </div>
+  </div>
   <noscript>
-    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
-      Please enable it to continue.</strong>
+    Please enable JavaScript to play Tic Tac Toe!
   </noscript>
-  <div id="app"></div>
-  <!-- built files will be auto injected -->
 </body>
 
 </html>
