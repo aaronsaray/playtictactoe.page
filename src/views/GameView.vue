@@ -1,7 +1,7 @@
 <template>
   <div>
     <game-board></game-board>
-    <start-game v-if="!gameStyle" @style-chosen="styleChosen"></start-game>
+    <start-game :join-game-id="gameId"></start-game>
   </div>
 </template>
 
@@ -15,9 +15,13 @@ export default {
     "start-game": StartGame,
   },
 
+  created() {
+    this.gameId = this.$route.params.game_id;
+  },
+
   data() {
     return {
-      gameStyle: null,
+      gameId: null,
     };
   },
 

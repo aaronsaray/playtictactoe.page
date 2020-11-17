@@ -16,6 +16,11 @@ const routes = [
     name: "AboutView",
     component: AboutView,
   },
+  {
+    path: "/:game_id",
+    name: "GameViewWithGameId",
+    component: GameView,
+  },
 ];
 
 const router = new VueRouter({
