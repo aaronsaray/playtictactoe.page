@@ -1,51 +1,35 @@
 <template>
-  <div id="app">
-    <main>
-      <router-view />
-    </main>
-  </div>
+  <main id="app">
+    <router-view />
+  </main>
 </template>
 
 <style lang="scss">
-* {
-  scrollbar-color: #333333 #202020;
-}
-*::-webkit-scrollbar-track {
-  background: #202020;
-}
-*::-webkit-scrollbar-thumb {
-  background-color: #333333;
-}
-#app {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-main {
-  text-align: center;
-}
 h2 {
+  padding: 1rem;
   margin: 0;
-  text-align: center;
-  font-size: 2rem;
+  font-size: 2.2rem;
   font-weight: 300;
 }
-button {
-  background: $primary;
-  color: set-button-text-color($primary);
-  padding: 0.3rem 0.7rem;
-  cursor: pointer;
-}
 input {
-  background: #121212;
-  color: #fff;
+  background-color: #111111;
+  padding: 0.3rem;
+  color: #ffffff;
   border: none;
-  border-bottom: 1px solid #444;
-  padding: 0.2rem 0.5rem;
+  border-bottom: 2px solid #444444;
+  &:focus {
+    outline: none;
+  }
 }
-.x {
-  color: $x;
-}
-.o {
-  color: $o;
+button {
+  background-color: $x;
+  color: set-button-text-color($x);
+  font-size: 1.1rem;
+  padding: 0.2rem 0.8rem;
+  border: none;
+  cursor: pointer;
+  &:hover {
+    background-color: $o;
+  }
 }
 </style>

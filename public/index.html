@@ -18,6 +18,15 @@
   <style>
     * {
       box-sizing: border-box;
+      scrollbar-color: #333333 #202020;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: #202020;
+    }
+
+    *::-webkit-scrollbar-thumb {
+      background-color: #333333;
     }
 
     html {
@@ -26,12 +35,33 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
         Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       height: 100%;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
     }
 
     body {
       margin: 0;
       padding: 0;
-      min-height: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    main {
+      flex: 1;
+    }
+
+    footer {
+      padding: 1rem;
+      font-size: 0.8rem;
+      background-color: #191919;
+      color: #dddddd;
+      text-align: center;
+    }
+
+    footer a {
+      color: #dddddd;
+      text-decoration: none;
     }
 
     h1 {
@@ -70,8 +100,10 @@
 </head>
 
 <body>
-  <h1>Play Tic Tac Toe</h1>
-  <div id="app">
+  <header>
+    <h1>Play Tic Tac Toe</h1>
+  </header>
+  <main id="app">
     <div id="loading">
       <svg enable-background="new 0 0 512 512" height="512" viewBox="0 0 512 512" width="512"
         xmlns="http://www.w3.org/2000/svg">
@@ -80,7 +112,11 @@
           fill="#cbd2d9" />
       </svg>
     </div>
-  </div>
+  </main>
+  <footer>
+    &copy; 2020 <a href="https://morebetterfaster.io"
+      title="For programming with best practices and bullet-proof processes">More Better Faster</a>
+  </footer>
   <noscript>
     Please enable JavaScript to play Tic Tac Toe!
   </noscript>

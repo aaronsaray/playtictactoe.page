@@ -1,6 +1,5 @@
 <template>
   <div>
-    <participant-info></participant-info>
     <section id="board">
       <a-mark v-for="(mark, index) in board" :key="index" class="a-mark-container"></a-mark>
     </section>
@@ -9,12 +8,10 @@
 
 <script>
 import AMark from "@/components/AMark.vue";
-import ParticipantInfo from "@/components/ParticipantInfo.vue";
 
 export default {
   components: {
     "a-mark": AMark,
-    "participant-info": ParticipantInfo,
   },
 
   created() {
@@ -44,6 +41,7 @@ export default {
   margin: auto;
   display: grid;
   grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+
   .a-mark-container {
     overflow: hidden;
     border: 1vw solid $primary;
@@ -85,12 +83,15 @@ export default {
     text-align: center;
     line-height: 1;
     cursor: not-allowed;
+
     &.winner * {
       color: #ffffff;
     }
+
     &.available {
       cursor: pointer;
     }
+
     .considering {
       text-shadow: 0px 6px 9px #000000;
       opacity: 0.8;
