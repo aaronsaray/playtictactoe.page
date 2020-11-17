@@ -2,7 +2,7 @@
   <section id="player-name">
     <form @submit.prevent="handleSubmit()">
       <label for="player-name-input"> Your name </label><br />
-      <input v-model="name" required id="player-name-input" /><br />
+      <input v-model="name" required id="player-name-input" maxlength="20" /><br />
       <button type="submit">Set</button>
     </form>
   </section>

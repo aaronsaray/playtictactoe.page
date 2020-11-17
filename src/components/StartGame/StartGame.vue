@@ -61,8 +61,20 @@ export default {
     },
 
     startGame() {
-      // here is where we should if one player, just emit the data
-      // if 2 player, auth, and then either start or join a game
+      const gameDetails = {
+        type: this.type,
+        playerName: this.playerName,
+      };
+
+      if (this.type === GAME_TYPE_2_PLAYER) {
+        const authId = "auth123";
+        const gameId = "game234";
+
+        gameDetails.userId = authId;
+        gameDetails.gameId = gameId;
+      }
+
+      this.$emit("start-game", gameDetails);
     },
   },
 };

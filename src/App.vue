@@ -5,6 +5,13 @@
 </template>
 
 <style lang="scss">
+.x {
+  color: $x;
+}
+.o {
+  color: $o;
+}
+
 h2 {
   padding: 1rem;
   margin: 0;
