@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { SERIES_TYPE_2_PLAYER, SERIES_TYPE_1_PLAYER_EASY } from "@/SeriesTypes.js";
+import { SERIES_TYPE_2_PLAYER, SERIES_TYPE_1_PLAYER_EASY } from "@/SeriesTypes";
 
 export default {
   data() {
@@ -25,7 +25,7 @@ export default {
 
   methods: {
     chooseType(style) {
-      this.$emit("input", style);
+      this.$emit("type-chosen", style);
     },
   },
 };

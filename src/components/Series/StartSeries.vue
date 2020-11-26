@@ -1,7 +1,7 @@
 <template>
   <section id="start-series">
     <h2>Start Game</h2>
-    <choose-type v-if="!type" v-model="type"></choose-type>
+    <choose-type v-if="!type" @type-chosen="typeChosen"></choose-type>
     <div v-else>
       <p v-if="type === SERIES_TYPE_2_PLAYER">
         <span v-if="joinSeriesId">
@@ -13,7 +13,7 @@
     </div>
     <player-name
       v-if="type && !playerName"
-      :default-name="joinSeriesId ? 'Player 2' : 'Player 1'"
+      :default-name="defaultPlayerName"
       @name-chosen="setPlayerName"
     ></player-name>
     <div v-if="type && playerName">
@@ -43,36 +43,68 @@ export default {
     if (this.joinSeriesId) {
       this.type = SERIES_TYPE_2_PLAYER;
     }
+
+    this.$auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.playerUserId = user.uid;
+        if (user.displayName) {
+          this.defaultPlayerName = user.displayName;
+        }
+      }
+    });
   },
 
   data() {
     return {
       SERIES_TYPE_2_PLAYER,
       type: null,
+      defaultPlayerName: this.joinSeriesId ? "Player 2" : "Player 1",
       playerName: "",
+      playerUserId: null,
     };
   },
 
   methods: {
-    setPlayerName(name) {
-      this.playerName = name;
-
-      this.startSeries();
+    typeChosen(type) {
+      if (type !== SERIES_TYPE_2_PLAYER) {
+        this.type = type;
+      } else {
+        this.$auth()
+          .signInAnonymously()
+          .then(() => {
+            this.type = type;
+          })
+          .catch((error) => this.$error(error));
+      }
     },
 
-    startSeries() {
+    setPlayerName(name) {
+      const user = this.$auth().currentUser;
+
+      const start = () => {
+        this.playerName = name;
+        this.startSeries();
+      };
+
+      if (user.displayName !== name) {
+        user
+          .updateProfile({
+            displayName: name,
+          })
+          .then(start)
+          .catch((error) => this.$error(error));
+      } else {
+        start();
+      }
+    },
+
+    async startSeries() {
       const seriesDetails = {
         type: this.type,
         playerName: this.playerName,
+        userId: this.playerUserId,
+        seriesId: "game234",
       };
-
-      if (this.type === SERIES_TYPE_2_PLAYER) {
-        const authId = "auth123";
-        const seriesId = "game234";
-
-        seriesDetails.userId = authId;
-        seriesDetails.seriesId = seriesId;
-      }
 
       this.$emit("start-series", seriesDetails);
     },
