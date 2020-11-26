@@ -1,25 +1,25 @@
 <template>
   <section id="choose-type">
     <div>
-      <a href="#" @click.prevent="chooseType(GAME_TYPE_2_PLAYER)">2 Player Game</a><br />
+      <a href="#" @click.prevent="chooseType(SERIES_TYPE_2_PLAYER)">2 Player Game</a><br />
       You'll start the game as player X and get a special link to invite a friend.
     </div>
     <div>or</div>
     <div>
-      <a href="#" @click.prevent="chooseType(GAME_TYPE_1_PLAYER_EASY)">Vs Computer</a><br />
+      <a href="#" @click.prevent="chooseType(SERIES_TYPE_1_PLAYER_EASY)">Vs Computer</a><br />
       You'll start playing against your very fine computer or mobile phone.
     </div>
   </section>
 </template>
 
 <script>
-import { GAME_TYPE_2_PLAYER, GAME_TYPE_1_PLAYER_EASY } from "@/GameTypes";
+import { SERIES_TYPE_2_PLAYER, SERIES_TYPE_1_PLAYER_EASY } from "@/SeriesTypes.js";
 
 export default {
   data() {
     return {
-      GAME_TYPE_2_PLAYER,
-      GAME_TYPE_1_PLAYER_EASY,
+      SERIES_TYPE_2_PLAYER,
+      SERIES_TYPE_1_PLAYER_EASY,
     };
   },
 

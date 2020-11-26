@@ -13,7 +13,7 @@
 <script>
 export default {
   props: {
-    gameId: {
+    seriesId: {
       required: true,
       type: String,
     },
@@ -21,7 +21,7 @@ export default {
 
   computed: {
     url() {
-      return `https://playtictactoe.page/${this.gameId}`;
+      return `https://playtictactoe.page/${this.seriesId}`;
     },
   },
 

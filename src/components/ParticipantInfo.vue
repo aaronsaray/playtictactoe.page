@@ -29,9 +29,15 @@ export default {
       required: true,
       type: Object,
     },
-    xActive: {
-      type: Boolean,
+    activePlayer: {
+      type: String,
       required: true,
+    },
+  },
+
+  computed: {
+    xActive() {
+      return this.activePlayer === "x";
     },
   },
 };

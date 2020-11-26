@@ -1,38 +1,40 @@
 <template>
   <div>
-    <participant-info :players="players" :x-active="xActive"></participant-info>
+    <participant-info :players="players" :active-player="'x'"></participant-info>
     <game-board></game-board>
-    <start-game v-if="!gameType" :join-game-id="gameId" @start-game="startGame"></start-game>
-    <waiting-on-player-2 v-if="waitingOnPlayer2" :game-id="gameId"></waiting-on-player-2>
+    <start-series
+      v-if="!seriesType"
+      :join-series-id="seriesId"
+      @start-series="startSeries"
+    ></start-series>
+    <waiting-on-player-2 v-if="waitingOnPlayer2" :series-id="seriesId"></waiting-on-player-2>
   </div>
 </template>
 
 <script>
-import { GAME_TYPE_2_PLAYER } from "@/GameTypes";
+import { SERIES_TYPE_2_PLAYER } from "@/SeriesTypes";
 import GameBoard from "../components/GameBoard.vue";
 import ParticipantInfo from "../components/ParticipantInfo.vue";
-import StartGame from "../components/StartGame/StartGame.vue";
+import StartSeries from "../components/Series/StartSeries.vue";
 import WaitingOnPlayer2 from "../components/WaitingOnPlayer2.vue";
 
 export default {
   components: {
     "game-board": GameBoard,
-    "start-game": StartGame,
+    "start-series": StartSeries,
     "participant-info": ParticipantInfo,
     WaitingOnPlayer2,
   },
 
   created() {
-    this.gameId = this.$route.params.game_id;
+    this.seriesId = this.$route.params.series_id;
   },
 
   data() {
     return {
-      gameId: null,
+      seriesId: null,
 
-      gameType: null,
-
-      xActive: true,
+      seriesType: null,
 
       players: {
         x: {
@@ -55,27 +57,27 @@ export default {
 
   computed: {
     waitingOnPlayer2() {
-      return this.gameType === GAME_TYPE_2_PLAYER && this.players.o.userId === null;
+      return this.seriesType === SERIES_TYPE_2_PLAYER && this.players.o.userId === null;
     },
   },
 
   methods: {
-    startGame(gameDetails) {
-      this.gameType = gameDetails.type;
+    startSeries(seriesDetails) {
+      this.seriesType = seriesDetails.type;
 
-      if (this.gameType !== GAME_TYPE_2_PLAYER) {
+      if (this.seriesType !== SERIES_TYPE_2_PLAYER) {
         // 1 player easy or hard
-        this.players.x.name = gameDetails.playerName;
+        this.players.x.name = seriesDetails.playerName;
         this.players.o.name = "Computer";
-      } else if (this.gameId) {
+      } else if (this.seriesId) {
         // 2 player, joining
-        this.players.o.name = gameDetails.playerName;
-        this.players.o.userId = gameDetails.userId;
+        this.players.o.name = seriesDetails.playerName;
+        this.players.o.userId = seriesDetails.userId;
       } else {
         // 2 player, creating
-        this.players.x.name = gameDetails.playerName;
-        this.players.x.userId = gameDetails.userId;
-        this.gameId = gameDetails.gameId;
+        this.players.x.name = seriesDetails.playerName;
+        this.players.x.userId = seriesDetails.userId;
+        this.seriesId = seriesDetails.seriesId;
       }
     },
   },
@@ -83,7 +85,7 @@ export default {
 </script>
 
 <style lang="scss">
-#start-game,
+#start-series,
 #waiting-on-player-2 {
   position: absolute;
   top: 0;

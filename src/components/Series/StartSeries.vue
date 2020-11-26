@@ -1,10 +1,10 @@
 <template>
-  <section id="start-game">
+  <section id="start-series">
     <h2>Start Game</h2>
     <choose-type v-if="!type" v-model="type"></choose-type>
     <div v-else>
-      <p v-if="type === GAME_TYPE_2_PLAYER">
-        <span v-if="joinGameId">
+      <p v-if="type === SERIES_TYPE_2_PLAYER">
+        <span v-if="joinSeriesId">
           Joining a game as player O <br /><small>{{ joinGameId }}</small>
         </span>
         <span v-else> Starting a 2 Player Game </span>
@@ -13,7 +13,7 @@
     </div>
     <player-name
       v-if="type && !playerName"
-      :default-name="joinGameId ? 'Player 2' : 'Player 1'"
+      :default-name="joinSeriesId ? 'Player 2' : 'Player 1'"
       @name-chosen="setPlayerName"
     ></player-name>
     <div v-if="type && playerName">
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import { GAME_TYPE_2_PLAYER } from "@/GameTypes";
+import { SERIES_TYPE_2_PLAYER } from "@/SeriesTypes";
 import ChooseType from "./ChooseType.vue";
 import PlayerName from "./PlayerName.vue";
 
@@ -34,20 +34,20 @@ export default {
   },
 
   props: {
-    joinGameId: {
+    joinSeriesId: {
       required: false,
     },
   },
 
   created() {
-    if (this.joinGameId) {
-      this.type = GAME_TYPE_2_PLAYER;
+    if (this.joinSeriesId) {
+      this.type = SERIES_TYPE_2_PLAYER;
     }
   },
 
   data() {
     return {
-      GAME_TYPE_2_PLAYER,
+      SERIES_TYPE_2_PLAYER,
       type: null,
       playerName: "",
     };
@@ -57,31 +57,31 @@ export default {
     setPlayerName(name) {
       this.playerName = name;
 
-      this.startGame();
+      this.startSeries();
     },
 
-    startGame() {
-      const gameDetails = {
+    startSeries() {
+      const seriesDetails = {
         type: this.type,
         playerName: this.playerName,
       };
 
-      if (this.type === GAME_TYPE_2_PLAYER) {
+      if (this.type === SERIES_TYPE_2_PLAYER) {
         const authId = "auth123";
-        const gameId = "game234";
+        const seriesId = "game234";
 
-        gameDetails.userId = authId;
-        gameDetails.gameId = gameId;
+        seriesDetails.userId = authId;
+        seriesDetails.seriesId = seriesId;
       }
 
-      this.$emit("start-game", gameDetails);
+      this.$emit("start-series", seriesDetails);
     },
   },
 };
 </script>
 
 <style lang="scss">
-#start-game {
+#start-series {
   text-align: center;
   h2 {
     margin-bottom: 3rem;

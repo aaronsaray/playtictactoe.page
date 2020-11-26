@@ -17,8 +17,8 @@ const routes = [
     component: AboutView,
   },
   {
-    path: "/:game_id",
-    name: "GameViewWithGameId",
+    path: "/:series_id",
+    name: "GameViewWithSeriesId",
     component: GameView,
   },
 ];
