@@ -4,8 +4,8 @@
     <choose-type v-if="!type" @type-chosen="typeChosen"></choose-type>
     <div v-else>
       <p v-if="type === SERIES_TYPE_2_PLAYER">
-        <span v-if="joinSeriesId">
-          Joining a game as player O <br /><small>{{ joinGameId }}</small>
+        <span v-if="isPlayerO">
+          Joining a game as player O <br /><small>{{ joinSeriesId }}</small>
         </span>
         <span v-else> Starting a 2 Player Game </span>
       </p>
@@ -103,10 +103,63 @@ export default {
         type: this.type,
         playerName: this.playerName,
         userId: this.playerUserId,
-        seriesId: "game234",
       };
 
-      this.$emit("start-series", seriesDetails);
+      if (this.type === SERIES_TYPE_2_PLAYER) {
+        if (this.isPlayerO) {
+          // player o tries to join the joinSeriesId
+          const joinSeries = this.$functions().httpsCallable("joinSeries");
+
+          joinSeries({
+            seriesId: this.joinSeriesId,
+          })
+            .then(() => {
+              const seriesId = this.joinSeriesId;
+
+              this.$clientDb.setItem("seriesId", seriesId);
+
+              seriesDetails.seriesId = seriesId;
+              this.$emit("start-series", seriesDetails); // how do we know we're player 0?
+            })
+            .catch((error) => this.$error(error));
+        } else {
+          // player x starts the game
+          const createOrJoinSeries = this.$functions().httpsCallable("createOrJoinSeries");
+
+          createOrJoinSeries({
+            seriesId: this.$clientDb.getItem("seriesId"),
+          })
+            .then((response) => {
+              const seriesId = response.data;
+
+              this.$clientDb.setItem("seriesId", seriesId);
+
+              this.$router.push({
+                name: "GameViewWithSeriesId",
+                params: {
+                  series_id: seriesId,
+                },
+              });
+
+              seriesDetails.seriesId = seriesId;
+              this.$emit("start-series", seriesDetails);
+            })
+            .catch((error) => this.$error(error));
+        }
+      } else {
+        // 1 player, just start
+
+        // little garbage cleanup just in case
+        this.$clientDb.removeItem("seriesId");
+
+        this.$emit("start-series", seriesDetails);
+      }
+    },
+  },
+
+  computed: {
+    isPlayerO() {
+      return !!this.joinSeriesId;
     },
   },
 };
