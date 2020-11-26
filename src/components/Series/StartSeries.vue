@@ -135,6 +135,7 @@ export default {
         this.startSeries({
           id: "local",
           playerType: "x",
+          playerName: this.playerName,
         });
       }
     },
