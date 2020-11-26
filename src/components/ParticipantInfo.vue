@@ -3,9 +3,9 @@
     <div>
       <div class="player">
         <h2 :class="{ x: xActive }">&times;</h2>
-        <strong>{{ players.x.name }}</strong>
+        <strong>{{ series.x_player_name }}</strong>
       </div>
-      <div class="scores">{{ players.x.wins }} / {{ players.x.losses }} / {{ players.x.ties }}</div>
+      <div class="scores">{{ series.x.wins }} / {{ series.x.losses }} / {{ series.x.ties }}</div>
     </div>
     <div class="turn" :class="{ x: xActive, o: !xActive }">
       <span v-if="xActive">⬅</span>
@@ -15,9 +15,9 @@
     <div>
       <div class="player">
         <h2 :class="{ o: !xActive }">o</h2>
-        <strong>{{ players.o.name }}</strong>
+        <strong>{{ series.o_player_name }}</strong>
       </div>
-      <div class="scores">{{ players.o.wins }} / {{ players.o.losses }} / {{ players.o.ties }}</div>
+      <div class="scores">{{ series.o.wins }} / {{ series.o.losses }} / {{ series.o.ties }}</div>
     </div>
   </section>
 </template>
@@ -25,19 +25,15 @@
 <script>
 export default {
   props: {
-    players: {
+    series: {
       required: true,
       type: Object,
-    },
-    activePlayer: {
-      type: String,
-      required: true,
     },
   },
 
   computed: {
     xActive() {
-      return this.activePlayer === "x";
+      return this.series.active === "x";
     },
   },
 };

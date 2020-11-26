@@ -1,6 +1,7 @@
 <template>
   <div>
-    <participant-info :players="players" :active-player="'x'"></participant-info>
+    <a href="#" v-if="seriesType" id="start-over" @click.prevent="startOver()">Start Over</a>
+    <participant-info :series="series"></participant-info>
     <game-board></game-board>
     <start-series
       v-if="!seriesId"
@@ -40,20 +41,21 @@ export default {
 
       playerType: null,
 
-      players: {
+      series: {
+        active: "x",
+        x_player_name: "Player 1",
+        x_uid: null,
         x: {
-          name: "Player 1",
           wins: 0,
           losses: 0,
           ties: 0,
-          userId: null,
         },
+        o_player_name: "Player 2",
+        o_uid: null,
         o: {
-          name: "Player 2",
           wins: 0,
           losses: 0,
           ties: 0,
-          userId: null,
         },
       },
     };
@@ -64,7 +66,6 @@ export default {
       this.seriesId = seriesData.id;
       this.seriesType = seriesData.type;
       this.playerType = seriesData.playerType;
-      this.players[seriesData.playerType].name = seriesData.playerName;
 
       if (this.seriesType === SERIES_TYPE_2_PLAYER) {
         this.$router
@@ -75,15 +76,25 @@ export default {
             },
           })
           .catch((e) => e);
+
+        this.$bind("series", this.$firestore().collection("series").doc(this.seriesId));
       } else {
-        this.players.o.name = "Computer";
+        this.series.o_player_name = "Computer";
+      }
+    },
+
+    // kind of a nuclear option
+    startOver() {
+      // eslint-disable-next-line
+      if (window.confirm("Are you sure you want to leave this game and reset your score?")) {
+        window.location.href = "/";
       }
     },
   },
 
   computed: {
     isWaitingOnPlayer2() {
-      return this.seriesType === SERIES_TYPE_2_PLAYER;
+      return this.seriesType === SERIES_TYPE_2_PLAYER && this.series.o_uid === null;
     },
   },
 };
@@ -99,5 +110,14 @@ export default {
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.8);
   padding-top: 5rem;
+}
+
+#start-over {
+  color: #aaaaaa;
+  font-size: 0.8rem;
+  position: absolute;
+  top: 0.1rem;
+  right: 0.3rem;
+  z-index: 10;
 }
 </style>
