@@ -5,6 +5,13 @@ const admin = require("firebase-admin");
 admin.initializeApp();
 
 /**
+ * Here are errors that we can reference on the front side
+ */
+const ERROR_SERIES_ID_REQUIRED = "series-id-required";
+const ERROR_SERIES_ID_NOT_EXIST = "series-id-not-exist";
+const ERROR_NOT_MEMBER_OF_SERIES = "not-member-of-series";
+
+/**
  * Validates that our functions are called only by auth'd people
  */
 function ensureAuthenticated(context) {
@@ -17,75 +24,59 @@ function ensureAuthenticated(context) {
   }
 }
 
+/**
+ * This takes in a series id - and then it will try to retrieve that series id
+ * If it finds it, it will return what user the current auth user is
+ */
 exports.joinSeries = functions.https.onCall(async (data, context) => {
   ensureAuthenticated(context);
 
   const { seriesId } = data;
 
   if (!seriesId) {
-    throw new functions.https.HttpsError("failed-precondition", "A series id is required.");
+    throw new functions.https.HttpsError("failed-precondition", ERROR_SERIES_ID_REQUIRED);
   }
 
   const potentialSeries = await admin.firestore().collection("series").doc(seriesId).get();
 
-  if (potentialSeries.exists) {
-    const potentialSeriesData = potentialSeries.data();
-    if (potentialSeriesData.joined_uuid === context.auth.uid || !potentialSeriesData.joined_uuid) {
-      return seriesId;
-    }
+  if (!potentialSeries.exists) {
+    throw new functions.https.HttpsError("failed-precondition", ERROR_SERIES_ID_NOT_EXIST);
   }
 
-  throw new functions.https.HttpsError(
-    "failed-precondition",
-    "Series does not exist or joined by other user."
-  );
+  const potentialSeriesData = potentialSeries.data();
+
+  if (potentialSeriesData.x_uid === context.auth.uid) {
+    return "x";
+  }
+
+  if (potentialSeriesData.o_uid === context.auth.uid) {
+    return "o";
+  }
+
+  throw new functions.https.HttpsError("failed-precondition", ERROR_NOT_MEMBER_OF_SERIES);
 });
 
-exports.createOrJoinSeries = functions.https.onCall(async (data, context) => {
+exports.createSeries = functions.https.onCall(async (data, context) => {
   ensureAuthenticated(context);
-
-  const { seriesId } = data;
-
-  if (seriesId) {
-    const existing = await admin
-      .firestore()
-      .collection("series")
-      .where(admin.firestore.FieldPath.documentId(), "==", seriesId)
-      .where("created_uid", "==", context.auth.uid)
-      .get();
-
-    if (!existing.empty) {
-      let id;
-
-      existing.forEach((doc) => {
-        id = doc.id;
-      });
-
-      return id;
-    }
-  }
 
   const result = await admin
     .firestore()
     .collection("series")
     .add({
+      x_uid: context.auth.uid,
+      o_uid: null,
       x: {
-        uid: context.auth.uid,
         wins: 0,
         losses: 0,
         ties: 0,
       },
       o: {
-        uid: null,
         wins: 0,
         losses: 0,
         ties: 0,
       },
       active: "x",
-      created_uid: context.auth.uid,
-      joined_uuid: null,
       created: admin.firestore.FieldValue.serverTimestamp(),
-      updated: admin.firestore.FieldValue.serverTimestamp(),
     });
 
   return result.id;
