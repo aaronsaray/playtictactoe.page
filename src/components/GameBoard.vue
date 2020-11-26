@@ -1,7 +1,19 @@
 <template>
   <div>
     <section id="board">
-      <a-mark v-for="(mark, index) in board" :key="index" class="a-mark-container"></a-mark>
+      <a-mark
+        v-for="(mark, index) in game"
+        :key="`mark-${index}`"
+        class="a-mark-container"
+        :class="{
+          available: !mark && active === playerType,
+          winner: winner && winner === mark && winningSet.includes(index),
+        }"
+        :has-mark="mark"
+        :mark="active"
+        :enabled="active === playerType"
+        @player-chose="playerChose(index)"
+      ></a-mark>
     </section>
   </div>
 </template>
@@ -14,14 +26,35 @@ export default {
     "a-mark": AMark,
   },
 
-  created() {
-    this.board = Array(9).fill(null);
+  props: {
+    playerType: {
+      required: true,
+    },
+    active: {
+      type: String,
+      required: true,
+    },
+    game: {
+      required: true,
+      type: Array,
+    },
+    winner: {
+      required: true,
+    },
+    winningSet: {
+      required: true,
+      type: Array,
+    },
   },
 
-  data() {
-    return {
-      board: null,
-    };
+  methods: {
+    isMarkAvailable(index) {
+      return !this.game[index];
+    },
+
+    playerChose(index) {
+      this.$emit("player-chose", index);
+    },
   },
 };
 </script>
