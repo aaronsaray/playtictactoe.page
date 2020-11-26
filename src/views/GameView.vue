@@ -3,11 +3,11 @@
     <participant-info :players="players" :active-player="'x'"></participant-info>
     <game-board></game-board>
     <start-series
-      v-if="!seriesType"
-      :join-series-id="seriesId"
+      v-if="!seriesId"
+      :join-series-id="joinSeriesId"
       @start-series="startSeries"
     ></start-series>
-    <waiting-on-player-2 v-if="waitingOnPlayer2" :series-id="seriesId"></waiting-on-player-2>
+    <waiting-on-player-2 v-if="isWaitingOnPlayer2" :series-id="seriesId"></waiting-on-player-2>
   </div>
 </template>
 
@@ -27,14 +27,18 @@ export default {
   },
 
   created() {
-    this.seriesId = this.$route.params.series_id;
+    this.joinSeriesId = this.$route.params.series_id;
   },
 
   data() {
     return {
       seriesId: null,
 
+      joinSeriesId: null,
+
       seriesType: null,
+
+      playerType: null,
 
       players: {
         x: {
@@ -55,30 +59,31 @@ export default {
     };
   },
 
-  computed: {
-    waitingOnPlayer2() {
-      return this.seriesType === SERIES_TYPE_2_PLAYER && this.players.o.userId === null;
+  methods: {
+    startSeries(seriesData) {
+      this.seriesId = seriesData.id;
+      this.seriesType = seriesData.type;
+      this.playerType = seriesData.playerType;
+      this.players[seriesData.playerType].name = seriesData.playerName;
+
+      if (this.seriesType === SERIES_TYPE_2_PLAYER) {
+        this.$router
+          .push({
+            name: "GameViewWithSeriesId",
+            params: {
+              series_id: this.seriesId,
+            },
+          })
+          .catch((e) => e);
+      } else {
+        this.players.o.name = "Computer";
+      }
     },
   },
 
-  methods: {
-    startSeries(seriesDetails) {
-      this.seriesType = seriesDetails.type;
-
-      if (this.seriesType !== SERIES_TYPE_2_PLAYER) {
-        // 1 player easy or hard
-        this.players.x.name = seriesDetails.playerName;
-        this.players.o.name = "Computer";
-      } else if (this.seriesId) {
-        // 2 player, joining
-        this.players.o.name = seriesDetails.playerName;
-        this.players.o.userId = seriesDetails.userId;
-      } else {
-        // 2 player, creating
-        this.players.x.name = seriesDetails.playerName;
-        this.players.x.userId = seriesDetails.userId;
-        this.seriesId = seriesDetails.seriesId;
-      }
+  computed: {
+    isWaitingOnPlayer2() {
+      return this.seriesType === SERIES_TYPE_2_PLAYER;
     },
   },
 };

@@ -1,26 +1,36 @@
 <template>
   <section id="start-series">
     <h2>Start Game</h2>
-    <choose-type v-if="!type" @type-chosen="typeChosen"></choose-type>
+
+    <loading-spinner v-if="loading"></loading-spinner>
+
     <div v-else>
-      <p v-if="type !== SERIES_TYPE_2_PLAYER">
-        Starting a Single Player Game against the Computer.
-      </p>
-      <p v-else>2 Player Game</p>
-      <loading-spinner></loading-spinner>
+      <choose-type v-if="!type" @type-chosen="typeChosen"></choose-type>
+      <div v-else>
+        <p v-if="isTwoPlayerGame">
+          <span v-if="joinSeriesId">Joining</span>
+          2 Player Game
+        </p>
+        <p v-else>Starting a Single Player Game against the Computer.</p>
+        <player-name
+          v-if="!playerName"
+          :default-name="defaultPlayerName"
+          @name-chosen="nameChosen"
+        ></player-name>
+      </div>
     </div>
   </section>
 </template>
 
 <script>
 import { SERIES_TYPE_2_PLAYER } from "@/SeriesTypes";
+import PlayerName from "./PlayerName.vue";
 import ChooseType from "./ChooseType.vue";
-// import PlayerName from "./PlayerName.vue";
 
 export default {
   components: {
+    PlayerName,
     "choose-type": ChooseType,
-    // "player-name": PlayerName,
   },
 
   props: {
@@ -29,159 +39,121 @@ export default {
     },
   },
 
-  async created() {
-    this.$auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.user = user;
-        // if (user.displayName) {
-        //   this.defaultPlayerName = user.displayName;
-        // }
-      }
-    });
-
-    if (this.joinSeriesId) {
-      this.type = SERIES_TYPE_2_PLAYER;
-
-      await this.$auth().signInAnonymously();
-
-      const joinSeries = this.$functions().httpsCallable("joinSeries");
-
-      try {
-        const playerTypeDataObject = await joinSeries({
-          seriesId: this.joinSeriesId,
-        });
-
-        this.playerType = playerTypeDataObject.data;
-      } catch (e) {
-        const errorText = e.message;
-        if (errorText === "series-id-not-exist") {
-          this.$error("This game does not exist.");
-          this.reset();
-        } else if (errorText === "not-member-of-series") {
-          this.$error("Unable to join this game at this time.");
-          this.reset();
-        } else {
-          this.$error(e);
-        }
-      }
-    }
-  },
-
   data() {
     return {
-      SERIES_TYPE_2_PLAYER,
+      loading: false,
       type: null,
       defaultPlayerName: this.joinSeriesId ? "Player 2" : "Player 1",
       playerName: "",
       user: null,
-      playerType: null,
     };
   },
 
+  created() {
+    this.$auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.user = user;
+        if (user.displayName) {
+          this.defaultPlayerName = user.displayName;
+        }
+      }
+    });
+
+    if (this.joinSeriesId) {
+      this.typeChosen(SERIES_TYPE_2_PLAYER);
+    }
+  },
+
   methods: {
-    reset() {
-      this.type = null;
-      this.$router.push({
-        name: "GameView",
-      });
+    async typeChosen(type) {
+      this.type = type;
+
+      if (this.isTwoPlayerGame) {
+        this.loading = true;
+
+        try {
+          await this.$auth().signInAnonymously();
+        } catch (error) {
+          this.$error(error);
+        } finally {
+          this.loading = false;
+        }
+      }
     },
 
-    typeChosen(type) {
-      if (type !== SERIES_TYPE_2_PLAYER) {
-        return new Promise(() => {
-          this.type = type;
+    async nameChosen(name) {
+      this.playerName = name;
+
+      if (this.isTwoPlayerGame) {
+        this.loading = true;
+
+        try {
+          const user = this.$auth().currentUser;
+          if (user.displayName !== name) {
+            await user.updateProfile({
+              displayName: name,
+            });
+          }
+
+          let seriesDataObject = null;
+
+          if (this.joinSeriesId) {
+            const joinSeries = this.$functions().httpsCallable("joinSeries");
+
+            try {
+              seriesDataObject = await joinSeries({
+                seriesId: this.joinSeriesId,
+                playerName: this.playerName,
+              });
+            } catch (e) {
+              const errorKey = e.message;
+
+              if (errorKey === "series-id-not-exist") {
+                this.$error("This game does not exist. We'll create a new one.");
+              } else if (errorKey === "not-member-of-series") {
+                this.$error("You can not join this game. We'll create a new one.");
+              } else {
+                throw e;
+              }
+            }
+          }
+
+          if (!seriesDataObject) {
+            const createSeries = this.$functions().httpsCallable("createSeries");
+            seriesDataObject = await createSeries({
+              playerName: this.playerName,
+            });
+          }
+
+          this.startSeries(seriesDataObject.data);
+        } catch (error) {
+          this.$error(error);
+        } finally {
+          this.loading = false;
+        }
+      } else {
+        this.startSeries({
+          id: "local",
+          playerType: "x",
         });
       }
-      return this.$auth()
-        .signInAnonymously()
-        .then(() => {
-          this.type = type;
-        })
-        .catch((error) => this.$error(error));
     },
 
-    // setPlayerName(name) {
-    //   const user = this.$auth().currentUser;
+    startSeries({ id, playerType, playerName }) {
+      const seriesData = {
+        id,
+        type: this.type,
+        playerName,
+        playerType,
+      };
 
-    //   const start = () => {
-    //     this.playerName = name;
-    //     this.startSeries();
-    //   };
-
-    //   if (user && user.displayName !== name) {
-    //     user
-    //       .updateProfile({
-    //         displayName: name,
-    //       })
-    //       .then(start)
-    //       .catch((error) => this.$error(error));
-    //   } else {
-    //     start();
-    //   }
-    // },
-
-    // async startSeries() {
-    //   const seriesDetails = {
-    //     type: this.type,
-    //     playerName: this.playerName,
-    //     userId: this.playerUserId,
-    //   };
-
-    //   if (this.type === SERIES_TYPE_2_PLAYER) {
-    //     if (this.isPlayerO) {
-    //       // player o tries to join the joinSeriesId
-    //       const joinSeries = this.$functions().httpsCallable("joinSeries");
-
-    //       joinSeries({
-    //         seriesId: this.joinSeriesId,
-    //       })
-    //         .then(() => {
-    //           const seriesId = this.joinSeriesId;
-
-    //           this.$clientDb.setItem("seriesId", seriesId);
-
-    //           seriesDetails.seriesId = seriesId;
-    //           this.$emit("start-series", seriesDetails); // how do we know we're player 0?
-    //         })
-    //         .catch((error) => this.$error(error));
-    //     } else {
-    //       // player x starts the game
-    //       const createOrJoinSeries = this.$functions().httpsCallable("createOrJoinSeries");
-
-    //       createOrJoinSeries({
-    //         seriesId: this.$clientDb.getItem("seriesId"),
-    //       })
-    //         .then((response) => {
-    //           const seriesId = response.data;
-
-    //           this.$clientDb.setItem("seriesId", seriesId);
-
-    //           this.$router.push({
-    //             name: "GameViewWithSeriesId",
-    //             params: {
-    //               series_id: seriesId,
-    //             },
-    //           });
-
-    //           seriesDetails.seriesId = seriesId;
-    //           this.$emit("start-series", seriesDetails);
-    //         })
-    //         .catch((error) => this.$error(error));
-    //     }
-    //   } else {
-    //     // 1 player, just start
-
-    //     // little garbage cleanup just in case
-    //     this.$clientDb.removeItem("seriesId");
-
-    //     this.$emit("start-series", seriesDetails);
-    //   }
-    // },
+      this.$emit("start-series", seriesData);
+    },
   },
 
   computed: {
-    isPlayerO() {
-      return !!this.joinSeriesId;
+    isTwoPlayerGame() {
+      return this.type === SERIES_TYPE_2_PLAYER;
     },
   },
 };

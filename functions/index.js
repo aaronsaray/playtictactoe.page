@@ -31,13 +31,14 @@ function ensureAuthenticated(context) {
 exports.joinSeries = functions.https.onCall(async (data, context) => {
   ensureAuthenticated(context);
 
-  const { seriesId } = data;
+  const { seriesId, playerName } = data;
 
   if (!seriesId) {
     throw new functions.https.HttpsError("failed-precondition", ERROR_SERIES_ID_REQUIRED);
   }
 
-  const potentialSeries = await admin.firestore().collection("series").doc(seriesId).get();
+  const potentialSeriesRef = admin.firestore().collection("series").doc(seriesId);
+  const potentialSeries = await potentialSeriesRef.get();
 
   if (!potentialSeries.exists) {
     throw new functions.https.HttpsError("failed-precondition", ERROR_SERIES_ID_NOT_EXIST);
@@ -46,25 +47,73 @@ exports.joinSeries = functions.https.onCall(async (data, context) => {
   const potentialSeriesData = potentialSeries.data();
 
   if (potentialSeriesData.x_uid === context.auth.uid) {
-    return "x";
+    if (playerName !== potentialSeriesData.x_player_name) {
+      await potentialSeriesRef.update({
+        x_player_name: playerName,
+        updated: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return {
+      id: seriesId,
+      playerType: "x",
+      playerName,
+    };
   }
 
   if (potentialSeriesData.o_uid === context.auth.uid) {
-    return "o";
+    if (playerName !== potentialSeriesData.o_player_name) {
+      await potentialSeriesRef.update({
+        o_player_name: playerName,
+        updated: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    return {
+      id: seriesId,
+      playerType: "o",
+      playerName,
+    };
+  }
+
+  if (!potentialSeriesData.o_uid) {
+    await potentialSeriesRef.update({
+      o_uid: context.auth.uid,
+      o_player_name: playerName,
+      updated: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    return {
+      id: seriesId,
+      playerType: "o",
+      playerName,
+    };
   }
 
   throw new functions.https.HttpsError("failed-precondition", ERROR_NOT_MEMBER_OF_SERIES);
 });
 
+/**
+ * Create a series.
+ *
+ * Ensures authenticated, then creates a new series where we are the player X.
+ * Will return id of the series id, and playerType of x.
+ */
 exports.createSeries = functions.https.onCall(async (data, context) => {
   ensureAuthenticated(context);
+
+  const { playerName } = data;
+
+  const playerType = "x";
 
   const result = await admin
     .firestore()
     .collection("series")
     .add({
       x_uid: context.auth.uid,
+      x_player_name: playerName,
       o_uid: null,
+      o_player_name: "Player 2",
       x: {
         wins: 0,
         losses: 0,
@@ -75,9 +124,14 @@ exports.createSeries = functions.https.onCall(async (data, context) => {
         losses: 0,
         ties: 0,
       },
-      active: "x",
+      active: playerType,
       created: admin.firestore.FieldValue.serverTimestamp(),
+      updated: admin.firestore.FieldValue.serverTimestamp(),
     });
 
-  return result.id;
+  return {
+    id: result.id,
+    playerType,
+    playerName,
+  };
 });
