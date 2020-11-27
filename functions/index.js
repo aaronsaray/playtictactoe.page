@@ -106,10 +106,23 @@ exports.createSeries = functions.https.onCall(async (data, context) => {
 
   const playerType = "x";
 
+  const gameResult = await admin
+    .firestore()
+    .collection("games")
+    .add({
+      marks: Array(9).fill(null),
+      winner: null,
+      winningSet: [],
+      tie: false,
+      created: admin.firestore.FieldValue.serverTimestamp(),
+      updated: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
   const result = await admin
     .firestore()
     .collection("series")
     .add({
+      current_game_id: gameResult.id,
       x_uid: context.auth.uid,
       x_player_name: playerName,
       o_uid: null,
@@ -134,4 +147,170 @@ exports.createSeries = functions.https.onCall(async (data, context) => {
     playerType,
     playerName,
   };
+});
+
+function checkTie(marks) {
+  return marks.every((item) => item);
+}
+
+function checkWinner(marks) {
+  const winning = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+
+  let winningSet = [];
+  let winner = null;
+
+  const winningResult = winning.some((check) => {
+    const items = [marks[check[0]], marks[check[1]], marks[check[2]]];
+    if (items.every((item) => item === "x")) {
+      winningSet = check;
+      winner = "x";
+      return true;
+    }
+    if (items.every((item) => item === "o")) {
+      winningSet = check;
+      winner = "o";
+      return true;
+    }
+    return false;
+  });
+
+  if (winningResult) {
+    return {
+      winningSet,
+      winner,
+    };
+  }
+  return false;
+}
+
+// not currently checking if the last game is over
+exports.startNewGame = functions.https.onCall(async (data, context) => {
+  ensureAuthenticated(context);
+
+  const { seriesId } = data;
+
+  const seriesRef = admin.firestore().collection("series").doc(seriesId);
+  const seriesSnapshot = await seriesRef.get();
+
+  if (!seriesSnapshot.exists) {
+    throw new functions.https.HttpsError("failed-precondition", "Series does not exist");
+  }
+  const seriesData = seriesSnapshot.data();
+
+  if (seriesData.x_uid !== context.auth.uid) {
+    throw new functions.https.HttpsError(
+      "failed-precondition",
+      "You are not able to request a new game."
+    );
+  }
+
+  const gameResult = await admin
+    .firestore()
+    .collection("games")
+    .add({
+      marks: Array(9).fill(null),
+      winner: null,
+      winningSet: [],
+      tie: false,
+      created: admin.firestore.FieldValue.serverTimestamp(),
+      updated: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+  // should issue a new game with the active person being the last active (winner?) on the last one
+  await seriesRef.update({
+    current_game_id: gameResult.id,
+    updated: admin.firestore.FieldValue.serverTimestamp(),
+  });
+
+  return gameResult.id;
+});
+
+exports.playMark = functions.https.onCall(async (data, context) => {
+  ensureAuthenticated(context);
+
+  const { seriesId, index, mark } = data;
+
+  const seriesRef = admin.firestore().collection("series").doc(seriesId);
+  const seriesSnapshot = await seriesRef.get();
+
+  if (!seriesSnapshot.exists) {
+    throw new functions.https.HttpsError("failed-precondition", "Series does not exist");
+  }
+  const seriesData = seriesSnapshot.data();
+
+  const uidToCheck = `${mark}_uid`;
+
+  if (seriesData[uidToCheck] !== context.auth.uid) {
+    throw new functions.https.HttpsError("failed-precondition", "You can not make this mark.");
+  }
+
+  const gameRef = admin.firestore().collection("games").doc(seriesData.current_game_id);
+  const gameSnapshot = await gameRef.get();
+  const gameData = gameSnapshot.data();
+
+  if (gameData.marks[index]) {
+    throw new functions.https.HttpsError("failed-precondition", "This spot is already taken.");
+  }
+
+  // here is where we'd mark it
+  const { marks } = gameData;
+  marks[index] = mark;
+
+  // then check winner and tie (so messy)
+  const winningResult = checkWinner(marks);
+
+  const seriesUpdate = {
+    updated: admin.firestore.FieldValue.serverTimestamp(),
+  };
+
+  if (winningResult === false) {
+    if (checkTie(marks)) {
+      await gameRef.update({
+        marks,
+        tie: true,
+        updated: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      const { o, x } = seriesData;
+      o.ties += 1;
+      x.ties += 1;
+      seriesUpdate.o = o;
+      seriesUpdate.x = x;
+    } else {
+      await gameRef.update({ marks, updated: admin.firestore.FieldValue.serverTimestamp() });
+      seriesUpdate.active = seriesData.active !== "x" ? "x" : "o";
+    }
+  } else {
+    const { winner, winningSet } = winningResult;
+
+    await gameRef.update({
+      marks,
+      winner,
+      winningSet,
+      updated: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    const winnerKey = winner;
+    const loserKey = winner === "x" ? "o" : "x";
+
+    const w = seriesData[winnerKey];
+    w.wins += 1;
+    seriesUpdate[winnerKey] = w;
+
+    const l = seriesData[loserKey];
+    l.losses += 1;
+    seriesUpdate[loserKey] = l;
+  }
+
+  await seriesRef.update(seriesUpdate);
+
+  return true;
 });

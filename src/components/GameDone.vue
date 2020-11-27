@@ -5,7 +5,8 @@
       Wins!
     </h2>
     <h2 v-if="tie">It's a Tie.</h2>
-    <a href="#" @click.prevent="playAgain()">Play Again?</a>
+    <a v-if="canChoosePlayAgain" href="#" @click.prevent="playAgain()">Play Again?</a>
+    <p v-else>Waiting on other player to start new game.</p>
   </section>
 </template>
 
@@ -21,6 +22,11 @@ export default {
     },
 
     tie: {
+      required: true,
+      type: Boolean,
+    },
+
+    canChoosePlayAgain: {
       required: true,
       type: Boolean,
     },

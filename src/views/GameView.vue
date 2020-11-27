@@ -1,14 +1,16 @@
 <template>
   <div>
+    <loading-spinner v-if="loading" class="remote-loading"></loading-spinner>
     <a href="#" v-if="seriesType" id="start-over" @click.prevent="startOver()">Start Over</a>
     <participant-info :series="series"></participant-info>
     <game-board
-      :game="this.currentGame"
+      :game="currentGame.marks"
       :active="series.active"
       :player-type="playerType"
       @player-chose="playerChose"
-      :winner="winner"
-      :winning-set="winningSet"
+      :winner="currentGame.winner"
+      :winning-set="currentGame.winningSet"
+      :loading="loading"
     ></game-board>
     <start-series
       v-if="!seriesId"
@@ -17,10 +19,11 @@
     ></start-series>
     <waiting-on-player-2 v-if="isWaitingOnPlayer2" :series-id="seriesId"></waiting-on-player-2>
     <game-done
-      v-if="winner || tie"
-      :winner="winner"
-      :tie="tie"
+      v-if="currentGame.winner || currentGame.tie"
+      :winner="currentGame.winner"
+      :tie="currentGame.tie"
       :winner-name="winnerName"
+      :can-choose-play-again="playerType === 'x'"
       @play-again="playAgainRequested"
     ></game-done>
   </div>
@@ -45,10 +48,13 @@ export default {
 
   created() {
     this.joinSeriesId = this.$route.params.series_id;
+    this.resetGame();
   },
 
   data() {
     return {
+      loading: false,
+
       seriesId: null,
 
       joinSeriesId: null,
@@ -75,7 +81,7 @@ export default {
         },
       },
 
-      currentGame: Array(9).fill(null),
+      currentGame: {},
 
       winningSet: [],
       winner: null,
@@ -106,15 +112,35 @@ export default {
       }
     },
 
-    playerChose(index) {
-      this.$set(this.currentGame, index, this.series.active);
+    async playerChose(index) {
+      // respresent it locally (for both 1 player and 2 player)
+      this.$set(this.currentGame.marks, index, this.series.active);
 
-      if (!this.checkWinner() && !this.checkTie()) {
+      if (this.isTwoPlayerGame) {
+        // send it to the remote end point as well
+        const playMark = this.$functions().httpsCallable("playMark");
+        try {
+          this.loading = true;
+
+          await playMark({
+            seriesId: this.seriesId,
+            index,
+            mark: this.series.active,
+          });
+
+          this.loading = false;
+        } catch (error) {
+          this.$error(error);
+          this.reset(); // this should never error out
+          return false;
+        }
+      } else if (!this.checkWinner() && !this.checkTie()) {
         this.series.active = this.series.active === "x" ? "o" : "x";
         if (this.computerPlays) {
           this.computerPlaysEasy();
         }
       }
+      return true;
     },
 
     computerPlaysEasy() {
@@ -122,7 +148,7 @@ export default {
         let o;
         do {
           o = Math.floor(Math.random() * 9);
-        } while (this.currentGame[o]);
+        } while (this.currentGame.marks[o]);
         this.playerChose(o);
       }, 1000);
     },
@@ -142,21 +168,21 @@ export default {
 
       return winning.some((check) => {
         const items = [
-          this.currentGame[check[0]],
-          this.currentGame[check[1]],
-          this.currentGame[check[2]],
+          this.currentGame.marks[check[0]],
+          this.currentGame.marks[check[1]],
+          this.currentGame.marks[check[2]],
         ];
         if (items.every((item) => item === "x")) {
-          this.winningSet = check;
-          this.winner = "x";
+          this.currentGame.winningSet = check;
+          this.currentGame.winner = "x";
         } else if (items.every((item) => item === "o")) {
-          this.winningSet = check;
-          this.winner = "o";
+          this.currentGame.winningSet = check;
+          this.currentGame.winner = "o";
         }
 
-        if (this.winner) {
-          this.series[this.winner].wins += 1;
-          this.series[this.winner !== "x" ? "x" : "o"].losses += 1;
+        if (this.currentGame.winner) {
+          this.series[this.currentGame.winner].wins += 1;
+          this.series[this.currentGame.winner !== "x" ? "x" : "o"].losses += 1;
           return true;
         }
 
@@ -166,7 +192,7 @@ export default {
 
     // only for 1 player games
     checkTie() {
-      const isTie = this.currentGame.every((item) => item);
+      const isTie = this.currentGame.marks.every((item) => item);
       if (isTie) {
         this.tie = true;
         this.series.x.ties += 1;
@@ -176,27 +202,53 @@ export default {
       return false;
     },
 
-    // this is currently only set up for player 1
-    playAgainRequested() {
-      const active = this.winner || "x";
+    async playAgainRequested() {
+      if (this.isTwoPlayerGame) {
+        this.loading = true;
 
-      this.winner = null;
-      this.tie = false;
-      this.series.active = active;
+        try {
+          const startNewGame = this.$functions().httpsCallable("startNewGame");
 
-      this.currentGame = Array(9).fill(null);
+          await startNewGame({
+            seriesId: this.seriesId,
+          });
 
-      if (this.computerPlays) {
-        this.computerPlaysEasy();
+          this.loading = false;
+        } catch (e) {
+          this.$error(e);
+          this.resetGame();
+        }
+      } else {
+        const active = this.currentGame.winner || "x";
+
+        this.resetGame();
+        this.series.active = active;
+
+        if (this.computerPlays) {
+          this.computerPlaysEasy();
+        }
       }
+    },
+
+    resetGame() {
+      this.currentGame = {
+        marks: Array(9).fill(null),
+        winner: null,
+        winningSet: [],
+        tie: false,
+      };
     },
 
     // kind of a nuclear option
     startOver() {
       // eslint-disable-next-line
       if (window.confirm("Are you sure you want to leave this game and reset your score?")) {
-        window.location.href = "/";
+        this.reset();
       }
+    },
+
+    reset() {
+      window.location.href = "/";
     },
   },
 
@@ -210,11 +262,29 @@ export default {
     },
 
     winnerName() {
-      return this.winner ? this.series[`${this.winner}_player_name`] : "";
+      return this.currentGame.winner ? this.series[`${this.currentGame.winner}_player_name`] : "";
     },
 
     computerPlays() {
-      return this.series.active !== this.playerType;
+      return !this.isTwoPlayerGame && this.series.active !== this.playerType;
+    },
+  },
+
+  watch: {
+    series: {
+      handler(newSeries, oldSeries) {
+        if (newSeries.current_game_id && newSeries.current_game_id !== oldSeries.current_game_id) {
+          this.$bind(
+            "currentGame",
+            this.$firestore().collection("games").doc(newSeries.current_game_id),
+            {
+              reset: false,
+            }
+          );
+        }
+      },
+
+      deep: true,
     },
   },
 };
@@ -240,5 +310,13 @@ export default {
   top: 0.1rem;
   right: 0.3rem;
   z-index: 10;
+}
+
+.remote-loading {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  height: 1rem;
+  width: 1rem;
 }
 </style>

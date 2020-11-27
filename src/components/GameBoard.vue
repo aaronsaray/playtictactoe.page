@@ -6,12 +6,12 @@
         :key="`mark-${index}`"
         class="a-mark-container"
         :class="{
-          available: !mark && active === playerType,
+          available: !mark && active === playerType && !loading,
           winner: winner && winner === mark && winningSet.includes(index),
         }"
         :has-mark="mark"
         :mark="active"
-        :enabled="active === playerType"
+        :enabled="active === playerType && !loading"
         @player-chose="playerChose(index)"
       ></a-mark>
     </section>
@@ -27,6 +27,11 @@ export default {
   },
 
   props: {
+    loading: {
+      required: true,
+      type: Boolean,
+    },
+
     playerType: {
       required: true,
     },
