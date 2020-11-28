@@ -25,6 +25,7 @@ npm install
 * Copy `.env.example` to `.env.local` and fill in values
 * Create a cloud firestore database
 * Enable the billing account by upgrading from Spark to Blaze (and putting a notification for budget of $25)
+* go to Authentication and enable anonymous
 
 ### Deploy
 
