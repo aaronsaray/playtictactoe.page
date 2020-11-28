@@ -15,7 +15,7 @@ module.exports = functions.https.onCall(async (data, context) => {
 
   const playerType = "x";
 
-  const gameResultId = createNewGame();
+  const gameResultId = await createNewGame();
 
   const result = await admin
     .firestore()

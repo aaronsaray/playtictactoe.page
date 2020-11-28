@@ -318,5 +318,6 @@ export default {
   left: 1rem;
   height: 1rem;
   width: 1rem;
+  z-index: 10;
 }
 </style>

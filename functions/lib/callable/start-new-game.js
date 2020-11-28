@@ -27,7 +27,7 @@ module.exports = functions.https.onCall(async (data, context) => {
     );
   }
 
-  const gameResultId = createNewGame();
+  const gameResultId = await createNewGame();
 
   // should issue a new game with the active person being the last active (winner?) on the last one
   await seriesRef.update({
