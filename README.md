@@ -2,6 +2,11 @@
 
 [https://playtictactoe.page](https://playtictactoe.page) source code.
 
+## Rationale
+
+This project was to test out the validity of using hte VueFire library in conjunction with Cloud Firestore as a socket connection for real time gaming. Throughout the process, it became easier to use some Firebase functions to handle
+security instead of scripting Firestore rules. That, however, can sometimes lead to slow-downs.
+
 ## Project setup
 ```
 npm install
@@ -22,21 +27,3 @@ npm run serve
 ```
 npm run build
 ```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

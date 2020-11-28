@@ -5,12 +5,10 @@ import LoadingSpinner from "@/components/LoadingSpinner.vue";
 import router from "./router";
 import FirebasePlugin from "./FirebasePlugin";
 import ErrorPlugin from "./ErrorPlugin";
-import LocalStoragePlugin from "./LocalStoragePlugin";
 
 Vue.use(firestorePlugin);
 Vue.use(FirebasePlugin);
 Vue.use(ErrorPlugin);
-Vue.use(LocalStoragePlugin);
 
 Vue.component("loading-spinner", LoadingSpinner);
 
