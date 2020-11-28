@@ -22,9 +22,7 @@ export default {
 
     Firebase.initializeApp(config);
 
-    if (process.env.NODE_ENV === "production") {
-      Firebase.analytics();
-    }
+    Firebase.analytics();
 
     // eslint-disable-next-line
     Vue.prototype.$auth = Firebase.auth;
