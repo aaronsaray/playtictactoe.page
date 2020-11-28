@@ -1,5 +1,6 @@
 {
   "projects": {
-    "default": "play-tic-tac-toe-dev"
+    "default": "play-tic-tac-toe-dev",
+    "prod": "play-tic-tac-toe-prod"
   }
 }
