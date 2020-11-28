@@ -25,6 +25,12 @@ npm install
 * Copy `.env.example` to `.env.local` and fill in values
 * Create a cloud firestore database
 
+### Deploy
+
+* Deploy code to Netlify with environment variables set
+* Change to production Firebase project locally `firebase use prod`
+* Deploy functions `firebase deploy --only functions`
+* Deploy firebase rules `firebase deploy --only firestore:rules`
 
 ### Compiles and hot-reloads for development
 ```
