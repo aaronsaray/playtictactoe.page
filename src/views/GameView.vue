@@ -82,10 +82,6 @@ export default {
       },
 
       currentGame: {},
-
-      winningSet: [],
-      winner: null,
-      tie: false,
     };
   },
 
@@ -194,7 +190,7 @@ export default {
     checkTie() {
       const isTie = this.currentGame.marks.every((item) => item);
       if (isTie) {
-        this.tie = true;
+        this.currentGame.tie = true;
         this.series.x.ties += 1;
         this.series.o.ties += 1;
         return true;
