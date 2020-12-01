@@ -14,6 +14,8 @@ With all new technology implementations, hopefully you learn some stuff and you 
 - Always represent things on the client side first. Then send it to the server.  For something simple like tic tac toe, you could calculate wins/ties immediately, and then let the server confirm them.
 - Consider if you could write even more of this client side and write stronger rules in cloud firestore rules instead (like if the current player is X, and there are even or odd amount of marks, that would let you know if you could update it, etc)
 - Consider using triggers on database to check for wins/losses versus the heavy / slow cloud functions
+- 2 Player would allow for against a remote person or against the person on your computer
+- 1 player would develop an algorithm where it could review wins, and make a move to stop a win - and for easy it would do that 1 out of 5 times, for hard, 4 out of 5 times 
 
 ## Project setup
 ```
